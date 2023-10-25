@@ -29,10 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
 				date.setMinutes(input?.split(':')[1] as any);
 				date.setSeconds(0);
 
-				context.globalState.update(
-					new Date().toLocaleDateString() + '-lunch-start',
-					date.getTime()
-				);
+				setLunchStart(context, date.getTime());
 				updateStatusBarItem(context);
 				vscode.window.showInformationMessage('Votre heure de début de pause a été redéfinie à ' + date.toLocaleTimeString());
 			}
@@ -47,10 +44,7 @@ export function activate(context: vscode.ExtensionContext) {
 				date.setMinutes(input?.split(':')[1] as any);
 				date.setSeconds(0);
 
-				context.globalState.update(
-					new Date().toLocaleDateString() + '-lunch-end',
-					date.getTime()
-				);
+				setLunchEnd(context, date.getTime());
 				updateStatusBarItem(context);
 				vscode.window.showInformationMessage('Votre heure de fin de pause a été redéfinie à ' + date.toLocaleTimeString());
 			}
@@ -84,6 +78,15 @@ function updateStatusBarItem(context: vscode.ExtensionContext) {
 	timeLeft = Math.abs(timeLeft);
 	let hours = Math.floor(timeLeft / (60 * 60 * 1000));
 	let minutes = Math.floor((timeLeft % (60 * 60 * 1000)) / (60 * 1000));
+
+	// Compute status bar background color
+	if (timeLeft < 0) {
+		statusBarItem.backgroundColor = new vscode.ThemeColor('statusBarItem.debuggingBackground');
+	} else if (getLunchEnd(context) === undefined) {
+		statusBarItem.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
+	} else {
+		statusBarItem.backgroundColor = new vscode.ThemeColor('statusBarItem.background');
+	}
 
 	statusBarItem.text = '$(timeline-open) ' + sign + hours + ' hrs ' + minutes + ' mins';
 	statusBarItem.command = 'working-tracking.openDashboard';
@@ -143,11 +146,57 @@ function setDailyArrival(context: vscode.ExtensionContext, arrivalTime?: number)
  * @return number The lunch duration in milliseconds
  */
 function getLunchDuration(context: vscode.ExtensionContext) {
-	const lunchStart = context.globalState.get('lunchStart');
-	const lunchEnd = context.globalState.get('lunchEnd');
+	const lunchStart = context.globalState.get(new Date().toLocaleDateString() + '-lunch-start');
+	const lunchEnd = context.globalState.get(new Date().toLocaleDateString() + '-lunch-end');
 	if (lunchStart && lunchEnd) {
 		return (lunchEnd as number) - (lunchStart as number);
 	}
 
 	return 60 * 60 * 1000; // default to 1 hour
+}
+
+/**
+ * Return the lunch start time in milliseconds
+ *
+ * @param context
+ * @return number The lunch start time in milliseconds
+ */
+function getLunchStart(context: vscode.ExtensionContext) {
+	return context.globalState.get(new Date().toLocaleDateString() + '-lunch-start');
+}
+
+/**
+ * Return the lunch end time in milliseconds
+ *
+ * @param context
+ * @return number The lunch end time in milliseconds
+ */
+function getLunchEnd(context: vscode.ExtensionContext) {
+	return context.globalState.get(new Date().toLocaleDateString() + '-lunch-end');
+}
+
+/**
+ * Set the lunch start time in milliseconds
+ *
+ * @param context
+ * @param lunchStart
+ */
+function setLunchStart(context: vscode.ExtensionContext, lunchStart: number) {
+	context.globalState.update(
+		new Date().toLocaleDateString() + '-lunch-start',
+		lunchStart
+	);
+}
+
+/**
+ * Set the lunch end time in milliseconds
+ *
+ * @param context
+ * @param lunchEnd
+ */
+function setLunchEnd(context: vscode.ExtensionContext, lunchEnd: number) {
+	context.globalState.update(
+		new Date().toLocaleDateString() + '-lunch-end',
+		lunchEnd
+	);
 }
