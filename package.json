@@ -2,7 +2,7 @@
   "name": "workingtracking",
   "displayName": "WorkingTracking",
   "description": "",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "publisher": "ccailly",
   "repository": {
     "type": "git",
@@ -11,6 +11,7 @@
   "engines": {
     "vscode": "^1.81.0"
   },
+  "icon": "./resources/images/icon.png",
   "categories": [
     "Other"
   ],
@@ -20,6 +21,10 @@
   "main": "./out/extension.js",
   "contributes": {
     "commands": [
+      {
+        "command": "working-tracking.quickPick",
+        "title": "Working-Tracking - Quick Pick"
+      },
       {
         "command": "working-tracking.setArrivalTime",
         "title": "Working-Tracking - Définir mon heure d'arrivée"
@@ -31,6 +36,14 @@
       {
         "command": "working-tracking.setLunchEndTime",
         "title": "Working-Tracking - Définir mon heure de fin de pause"
+      },
+      {
+        "command": "working-tracking.startBreak",
+        "title": "Working-Tracking - Commencer ma pause"
+      },
+      {
+        "command": "working-tracking.endBreak",
+        "title": "Working-Tracking - Finir ma pause"
       }
     ]
   },
